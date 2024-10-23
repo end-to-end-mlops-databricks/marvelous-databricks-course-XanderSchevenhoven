@@ -37,6 +37,8 @@ lint.select = [
 ]
 lint.ignore = [
     "E501",  # line-too-long
+    "E402", # import not at top of files
+    "
 ]
 builtins = [
     "_",
