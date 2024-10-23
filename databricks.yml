@@ -1,0 +1,19 @@
+# This is a Databricks asset bundle definition for marvelous-databricks-course-XanderSchevenhoven.
+# The Databricks extension requires databricks.yml configuration file.
+# See https://docs.databricks.com/dev-tools/bundles/index.html for documentation.
+
+bundle:
+  name: marvelous-databricks-course-XanderSchevenhoven
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: https://adb-8342392658526315.15.azuredatabricks.net
+
+  ## Optionally, there could be 'staging' or 'prod' targets here.
+  #
+  # prod:
+  #   workspace:
+  #     host: https://adb-8342392658526315.15.azuredatabricks.net
