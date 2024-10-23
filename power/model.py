@@ -31,7 +31,7 @@ class PowerModel:
         r2 = r2_score(target_test, target_predictions)
         return mse, r2
 
-    def get_feature_importance(self, features_train, target_train):
+    def get_feature_importance(self):
         feature_importance = self.model.named_steps["regressor"].feature_importances_
         feature_names = self.model.named_steps["preprocessor"].get_feature_names_out()
         return feature_importance, feature_names

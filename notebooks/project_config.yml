@@ -7,35 +7,10 @@ parameters:
   max_depth: 6
 
 numeric_features:
-  - LotArea
-  - OverallQual
-  - OverallCond
-  - YearBuilt
-  - YearRemodAdd
-  - MasVnrArea
-  - TotalBsmtSF
-  - GrLivArea
-  - GarageCars
-  - GarageArea
+  - Temperature
+  - Humidity
+  - Wind Speed
+  - general diffuse flows
+  - diffuse flows
 
-category_features:
-  - MSZoning
-  - Street
-  - Alley
-  - LotShape
-  - LandContour
-  - Neighborhood
-  - Condition1
-  - BldgType
-  - HouseStyle
-  - RoofStyle
-  - Exterior1st
-  - Exterior2nd
-  - MasVnrType
-  - Foundation
-  - Heating
-  - CentralAir
-  - SaleType
-  - SaleCondition
-
-target: SalePrice
+target_column_name: Zone 1 Power Consumption

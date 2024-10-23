@@ -20,15 +20,11 @@
 # COMMAND ----------
 
 import yaml
-from power import (
-    DataProcessor, 
-    PowerModel, 
-    visualize_results, 
-    plot_feature_importance
-)
+
+from power import DataProcessor, PowerModel, plot_feature_importance, visualize_results
 
 # COMMAND ----------
-# MAGIC %md 
+# MAGIC %md
 # MAGIC ##### 2. Get configs
 
 # COMMAND ----------
@@ -40,12 +36,12 @@ print("Configuration loaded:")
 print(yaml.dump(config, default_flow_style=False))
 
 # COMMAND ----------
-# MAGIC %md 
+# MAGIC %md
 # MAGIC ## II. Apply preprocessor and model
 
 # COMMAND ----------
- 
-processor = DataProcessor(config = config)
+
+processor = DataProcessor(config=config)
 processor.preprocess_data()
 
 # COMMAND ----------
@@ -62,14 +58,14 @@ model.train(features_train, target_train)
 
 # COMMAND ----------
 # Evaluate the model
-mse, r2 = model.evaluate(X_test, y_test)
+mse, r2 = model.evaluate(features_test, target_test)
 print(f"Mean Squared Error: {mse}")
 print(f"R2 Score: {r2}")
 
 # COMMAND ----------
 ## Visualizing Results
-y_pred = model.predict(X_test)
-visualize_results(y_test, y_pred)
+y_pred = model.predict(features_test)
+visualize_results(target_test, y_pred)
 
 # COMMAND ----------
 ## Feature Importance
