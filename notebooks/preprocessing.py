@@ -14,7 +14,7 @@
 # MAGIC %md ##### 1. Install / import libraries
 
 # COMMAND ----------
-%pip install ".."
+get_ipython().run_line_magic('pip', f'install ".."')
 
 # COMMAND ----------
 
