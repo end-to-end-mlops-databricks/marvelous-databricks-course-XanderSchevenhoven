@@ -14,11 +14,10 @@
 # MAGIC %md ##### 1. Install / import libraries
 
 # COMMAND ----------
-get_ipython().run_line_magic('pip', f'install ".."')
+get_ipython().run_line_magic("pip", 'install ".."')
 
 # COMMAND ----------
 
-from power import DataProcessor, PowerModel
 import yaml
 
 # COMMAND ----------
@@ -34,4 +33,3 @@ print(yaml.dump(config, default_flow_style=False))
 
 # COMMAND ----------
 # MAGIC %md ## II. Apply preprocessor and model
-
