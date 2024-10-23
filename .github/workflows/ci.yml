@@ -11,15 +11,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v3
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          cache: 'pip'
+          cache-dependency-path: setup.py
 
-      - name: Set up Python
-        run: uv python install 3.11
+      - name: Install pip
+        run: |
+          python -m pip install --upgrade pip
 
-      - name: Install the dependencies
-        run: uv sync 
+      - name: Install dependencies and project
+        run: |
+          pip install -e .
 
       - name: Run pre-commit checks
         run: |
           pre-commit run --all-files
+  
