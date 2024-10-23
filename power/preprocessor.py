@@ -4,10 +4,11 @@ from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from ucimlrepo import fetch_ucirepo 
 
 
 class DataProcessor:
-    def __init__(self, file_path, config):
+    def __init__(self, config):
         """
         Initiate DataProcessor class and its attributes. The provided csv file_path is
         automatically loaded and stored in this class.
@@ -20,27 +21,28 @@ class DataProcessor:
             Dictionary with configuration options for preprocessing.
 
         """
-        self.pdf = self.load_data(file_path)
+        self.pdf = self.load_data()
         self.config = config
         self.pdf_features = None
         self.pdf_target = None
         self.preprocessor = None
 
-    def load_data(self, file_path):
-        """
-        Method to read csv file as pandas dataframe.
 
-        Parameters
-        ----------
-        file_path : str
-            File path to the location of a CSV file.
+    def load_data(self):
+        """
+        Method to get the power consumption dataset as pandas dataframe.
 
         Returns
         -------
         Pandas DataFrame
 
         """
-        return pd.read_csv(file_path)
+        # fetch dataset 
+        power_consumption_of_tetouan_city = fetch_ucirepo(id=849) 
+  
+        # data (as pandas dataframes) 
+        return power_consumption_of_tetouan_city.data.original 
+        
 
     def preprocess_data(self):
         """
