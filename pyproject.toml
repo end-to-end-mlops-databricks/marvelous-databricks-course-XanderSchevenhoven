@@ -38,6 +38,12 @@ lint.select = [
 lint.ignore = [
     "E501",  # line-too-long
 ]
+builtins = [
+    "_",
+    "dbutils",
+    "spark",
+    "get_ipython"
+]
 
 [tool.ruff.format]
 indent-style = "space"
