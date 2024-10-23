@@ -19,9 +19,18 @@
 # COMMAND ----------
 
 from power import DataProcessor, PowerModel
+import yaml
 
 # COMMAND ----------
 # MAGIC %md ##### 2. Get configs
+
+# COMMAND ----------
+
+with open("project_config.yml", "r") as file:
+    config = yaml.safe_load(file)
+
+print("Configuration loaded:")
+print(yaml.dump(config, default_flow_style=False))
 
 # COMMAND ----------
 # MAGIC %md ## II. Apply preprocessor and model
