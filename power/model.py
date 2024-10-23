@@ -31,12 +31,12 @@ class PowerModel:
         self.model.fit(features_train, target_train)
 
 
-    def predict(self, feautures):
-        return self.model.predict(X)
+    def predict(self, features):
+        return self.model.predict(features)
 
 
     def evaluate(self, features_test, target_test):
-        target_predictions = self.model.predict(X_test)
+        target_predictions = self.model.predict(features_test)
         mse = mean_squared_error(target_test, target_predictions)
         r2 = r2_score(target_test, target_predictions)
         return mse, r2
@@ -46,5 +46,3 @@ class PowerModel:
         feature_importance = self.model.named_steps['regressor'].feature_importances_
         feature_names = self.model.named_steps['preprocessor'].get_feature_names_out()
         return feature_importance, feature_names
-
-        
