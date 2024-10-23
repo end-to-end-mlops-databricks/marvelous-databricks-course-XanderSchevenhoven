@@ -14,7 +14,7 @@ dependencies = [
     "pandas>=2.2.2, <3",
     "pyarrow>=15.0.2, <16",
     "cffi>=1.17.1, <2",
-    "scipy>=1.14.1, <2",
+    "scipy>=1.13.0, <2",
     "matplotlib>=3.9.2, <4",
     "databricks-feature-engineering>=0.6, <1"
 ]
