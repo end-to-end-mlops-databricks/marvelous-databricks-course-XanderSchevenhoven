@@ -24,7 +24,7 @@ jobs:
 
       - name: Install dependencies and project
         run: |
-          pip install -e .
+          pip install -e .[dev]
 
       - name: Run pre-commit checks
         run: |
