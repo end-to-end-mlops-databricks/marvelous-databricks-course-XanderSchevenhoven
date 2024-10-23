@@ -11,10 +11,18 @@
 # MAGIC %md ## I. Setup notebook
 
 # COMMAND ----------
-# MAGIC %md ## 1. Install / import libraries
+# MAGIC %md ##### 1. Install / import libraries
+
+# COMMAND ----------
+%pip install ".."
 
 # COMMAND ----------
 
 from power import DataProcessor, PowerModel
 
 # COMMAND ----------
+# MAGIC %md ##### 2. Get configs
+
+# COMMAND ----------
+# MAGIC %md ## II. Apply preprocessor and model
+
