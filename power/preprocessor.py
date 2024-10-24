@@ -44,11 +44,34 @@ class DataProcessor:
     def preprocess_data(self):
         """
         Method to create preprocessing pipeline steps.
+
+        This method modifies the following instance attributes:
+        - self.pdf: Removes rows with missing target values
+        - self.pdf_features: Sets features DataFrame
+        - self.pdf_target: Sets target Series
+        - self.preprocessor: Sets the sklearn preprocessing pipeline
+
+        Raises
+        ------
+        KeyError
+            If required configuration keys are missing
+        ValueError
+            If configuration values are invalid
         """
+        required_keys = ["target_column_name", "numeric_features"]
+        missing_keys = [key for key in required_keys if key not in self.config]
+        if missing_keys:
+            raise KeyError(f"Missing required config keys: {missing_keys}")
 
         # get target_column_name from config
         target_column_name = self.config["target_column_name"]
         numeric_features = self.config["numeric_features"]
+
+        if not numeric_features:
+            raise ValueError("numeric_features cannot be empty")
+
+        if not all(col in self.pdf.columns for col in numeric_features + [target_column_name]):
+            raise ValueError("Some specified columns not found in dataset")
 
         # remove rows with missing values in target
         self.pdf = self.pdf.dropna(subset=[target_column_name])
