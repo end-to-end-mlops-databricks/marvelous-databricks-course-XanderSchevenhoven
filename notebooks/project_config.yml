@@ -1,0 +1,16 @@
+catalog_name: marvelous_mlops
+schema_name: house_prices
+
+parameters:
+  learning_rate: 0.01
+  n_estimators: 1000
+  max_depth: 6
+
+numeric_features:
+  - Temperature
+  - Humidity
+  - Wind Speed
+  - general diffuse flows
+  - diffuse flows
+
+target_column_name: Zone 1 Power Consumption
