@@ -88,8 +88,31 @@ class DataProcessor:
         # combine preprocessing steps into single transformer
         self.preprocessor = ColumnTransformer(transformers=[("numeric", numeric_transformer, numeric_features)])
 
-    def split_data(self, test_size=0.2, random_state=42):
+    def split_data(self, test_size: float = 0.2, random_state: int = 42) -> tuple:
         """
         Method to split the dataset into training and test datasets.
+
+        Parameters
+        ----------
+        test_size : float, optional (default=0.2)
+            Proportion of the dataset to include in the test split
+        random_state : int, optional (default=42)
+            Random state for reproducibility
+
+        Returns
+        -------
+        tuple
+            (X_train, X_test, y_train, y_test) split of features and target
+
+        Raises
+        ------
+        ValueError
+            If preprocessing hasn't been performed or parameters are invalid
         """
+        if self.pdf_features is None or self.pdf_target is None:
+            raise ValueError("Must call preprocess_data before splitting")
+
+        if not 0 < test_size < 1:
+            raise ValueError("test_size must be between 0 and 1")
+
         return train_test_split(self.pdf_features, self.pdf_target, test_size=test_size, random_state=random_state)
