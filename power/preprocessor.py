@@ -7,25 +7,22 @@ from ucimlrepo import fetch_ucirepo
 
 
 class DataProcessor:
-    def __init__(self, config):
+    def __init__(self, config: dict) -> None:
         """
         Initiate DataProcessor class and its attributes. The provided csv file_path is
         automatically loaded and stored in this class.
 
         Parameters
         ----------
-        file_path : str
-            File path to the location of a CSV file.
         config : dict
             Dictionary with configuration options for preprocessing.
 
         """
-        self.pdf = self.load_data()
         self.config = config
+        self.pdf = self.load_data()
         self.pdf_features = None
         self.pdf_target = None
         self.preprocessor = None
-
     def load_data(self):
         """
         Method to get the power consumption dataset as pandas dataframe.
