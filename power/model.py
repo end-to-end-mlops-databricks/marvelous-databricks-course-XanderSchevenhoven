@@ -6,7 +6,7 @@ from sklearn.pipeline import Pipeline
 class PowerModel:
     def __init__(self, preprocessor, config):
         # initiate config as part of class
-        self.confg = config
+        self.config = config
         self.preprocessor = preprocessor
 
         # create regressor
