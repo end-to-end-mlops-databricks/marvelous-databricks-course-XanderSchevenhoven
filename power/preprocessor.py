@@ -23,6 +23,7 @@ class DataProcessor:
         self.pdf_features = None
         self.pdf_target = None
         self.preprocessor = None
+
     def load_data(self):
         """
         Method to get the power consumption dataset as pandas dataframe.
