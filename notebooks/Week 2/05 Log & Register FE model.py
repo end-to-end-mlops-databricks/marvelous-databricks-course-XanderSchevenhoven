@@ -11,31 +11,25 @@
 get_ipython().run_line_magic("pip", 'install -e "../.."')
 
 # COMMAND ----------
-import json
-import numpy as np
-import pandas as pd
 
 import mlflow
+import pyspark.sql.functions as f
+from databricks import feature_engineering
+from databricks.feature_engineering import FeatureFunction, FeatureLookup
+from databricks.sdk.runtime import spark
 from mlflow import MlflowClient
 from mlflow.models import infer_signature
-from mlflow.utils.environment import _mlflow_conda_env
-
-import pyspark.sql.functions as f
-from databricks.feature_engineering import FeatureFunction, FeatureLookup
-from databricks import feature_engineering
-from databricks.sdk.runtime import spark
-
+from sklearn.compose import ColumnTransformer
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.impute import SimpleImputer
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
-from sklearn.compose import ColumnTransformer
-from sklearn.impute import SimpleImputer
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 
-from power import ProjectConfig, to_snake, adjust_predictions
+from power import ProjectConfig, to_snake
 
 mlflow.set_tracking_uri("databricks")
-mlflow.set_registry_uri('databricks-uc') # It must be -uc for registering models to Unity Catalog
+mlflow.set_registry_uri("databricks-uc")  # It must be -uc for registering models to Unity Catalog
 client = MlflowClient()
 fe = feature_engineering.FeatureEngineeringClient()
 
@@ -70,25 +64,17 @@ spark.sql(f"""
 """)
 
 # add primary key constraints
-spark.sql(
-    f"ALTER TABLE {feature_table_name} "
-    "ADD CONSTRAINT house_pk PRIMARY KEY(date_time);"
-)
+spark.sql(f"ALTER TABLE {feature_table_name} " "ADD CONSTRAINT house_pk PRIMARY KEY(date_time);")
 
 # enable change data feed
-spark.sql(
-    f"ALTER TABLE {feature_table_name} "
-    "SET TBLPROPERTIES (delta.enableChangeDataFeed = true);"
-)
+spark.sql(f"ALTER TABLE {feature_table_name} " "SET TBLPROPERTIES (delta.enableChangeDataFeed = true);")
 
 # Insert data into the feature table from both train and test sets
 spark.sql(
-    f"INSERT INTO {feature_table_name} "
-    f"SELECT date_time, temperature, humidity FROM {full_schema_name}.train_set"
+    f"INSERT INTO {feature_table_name} " f"SELECT date_time, temperature, humidity FROM {full_schema_name}.train_set"
 )
 spark.sql(
-    f"INSERT INTO {feature_table_name} "
-    f"SELECT date_time, temperature, humidity FROM {full_schema_name}.test_set"
+    f"INSERT INTO {feature_table_name} " f"SELECT date_time, temperature, humidity FROM {full_schema_name}.test_set"
 )
 
 # COMMAND ----------
@@ -107,14 +93,14 @@ spark.sql(f"""
 train_set = (
     spark.table(f"{full_schema_name}.train_set")
     .withColumn("temperature_fahrenheit", f.col("temperature").cast("int"))
-    .drop('temperature', 'humidity')
+    .drop("temperature", "humidity")
 )
 test_set = spark.table(f"{full_schema_name}.test_set").toPandas()
 
 # setup feature engineering
 training_set = fe.create_training_set(
-    df = train_set,
-    label = target_clean,
+    df=train_set,
+    label=target_clean,
     feature_lookups=[
         FeatureLookup(
             table_name=feature_table_name,
@@ -127,14 +113,14 @@ training_set = fe.create_training_set(
             input_bindings={"temperature": "temperature_fahrenheit"},
         ),
     ],
-    exclude_columns=["update_timestamp_utc"]
+    exclude_columns=["update_timestamp_utc"],
 )
 
 # Load feature-engineered DataFrame
 training_df = training_set.load_df().toPandas()
 
 # Calculate temp fahrenheit for test set
-test_set["temperature"] = test_set["temperature"] * (9/5) + 32
+test_set["temperature"] = test_set["temperature"] * (9 / 5) + 32
 
 # Split features and target
 X_train = training_df[numeric_features_clean]
@@ -143,22 +129,15 @@ X_test = test_set[numeric_features_clean]
 y_test = test_set[target_clean]
 
 # create numeric features transformer
-numeric_transformer = Pipeline(
-    steps=[
-        ("imputer", SimpleImputer(strategy="median")), 
-        ("scaler", StandardScaler())
-    ]
-)
+numeric_transformer = Pipeline(steps=[("imputer", SimpleImputer(strategy="median")), ("scaler", StandardScaler())])
 
 # combine preprocessing steps into single transformer
-preprocessor = ColumnTransformer(
-    transformers=[("numeric", numeric_transformer, numeric_features_clean)]
-)
+preprocessor = ColumnTransformer(transformers=[("numeric", numeric_transformer, numeric_features_clean)])
 
 # create regressor
 regressor = RandomForestRegressor(
-    n_estimators=config.parameters['n_estimators'],
-    max_depth=config.parameters['max_depth'],
+    n_estimators=config.parameters["n_estimators"],
+    max_depth=config.parameters["max_depth"],
     random_state=42,
 )
 
@@ -171,8 +150,7 @@ model
 mlflow.set_experiment(experiment_name=config.experiment_name)
 git_sha = "ffa63b430205ff7"
 
-with mlflow.start_run(tags={"branch": "week2",
-                            "git_sha": f"{git_sha}"}) as run:
+with mlflow.start_run(tags={"branch": "week2", "git_sha": f"{git_sha}"}) as run:
     run_id = run.info.run_id
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
@@ -204,5 +182,5 @@ with mlflow.start_run(tags={"branch": "week2",
 
 
 mlflow.register_model(
-    model_uri=f'runs:/{run_id}/{config.model_artifact_name}',
-    name=f"{full_schema_name}.{config.model_name}_fe")
+    model_uri=f"runs:/{run_id}/{config.model_artifact_name}", name=f"{full_schema_name}.{config.model_name}_fe"
+)

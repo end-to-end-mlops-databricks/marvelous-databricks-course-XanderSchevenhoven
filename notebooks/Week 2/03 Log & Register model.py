@@ -13,20 +13,19 @@ get_ipython().run_line_magic("pip", 'install -e "../.."')
 # COMMAND ----------
 
 import mlflow
-from mlflow.models import infer_signature
 from databricks.sdk.runtime import spark
-
+from mlflow.models import infer_signature
+from sklearn.compose import ColumnTransformer
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.impute import SimpleImputer
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
-from sklearn.compose import ColumnTransformer
-from sklearn.impute import SimpleImputer
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 
 from power import ProjectConfig, to_snake
 
 mlflow.set_tracking_uri("databricks")
-mlflow.set_registry_uri('databricks-uc') # It must be -uc for registering models to Unity Catalog
+mlflow.set_registry_uri("databricks-uc")  # It must be -uc for registering models to Unity Catalog
 
 # COMMAND ----------
 
@@ -54,22 +53,15 @@ y_test = test_set[target_clean]
 
 # COMMAND ----------
 # create numeric features transformer
-numeric_transformer = Pipeline(
-    steps=[
-        ("imputer", SimpleImputer(strategy="median")), 
-        ("scaler", StandardScaler())
-    ]
-)
+numeric_transformer = Pipeline(steps=[("imputer", SimpleImputer(strategy="median")), ("scaler", StandardScaler())])
 
 # combine preprocessing steps into single transformer
-preprocessor = ColumnTransformer(
-    transformers=[("numeric", numeric_transformer, numeric_features_clean)]
-)
+preprocessor = ColumnTransformer(transformers=[("numeric", numeric_transformer, numeric_features_clean)])
 
 # create regressor
 regressor = RandomForestRegressor(
-    n_estimators=config.parameters['n_estimators'],
-    max_depth=config.parameters['max_depth'],
+    n_estimators=config.parameters["n_estimators"],
+    max_depth=config.parameters["max_depth"],
     random_state=42,
 )
 
@@ -85,8 +77,7 @@ git_sha = "ffa63b430205ff7"
 # COMMAND ----------
 # start training run with mlflow
 with mlflow.start_run(
-    tags={"git_sha": f"{git_sha}",
-          "branch": "week2"},
+    tags={"git_sha": f"{git_sha}", "branch": "week2"},
 ) as run:
     run_id = run.info.run_id
 
@@ -111,27 +102,20 @@ with mlflow.start_run(
     signature = infer_signature(model_input=X_train, model_output=y_pred)
 
     # log input dataset
-    dataset = mlflow.data.from_spark(
-        train_set_spark, 
-        table_name=f"{full_schema_name}.train_set",
-        version="0"
-    )
+    dataset = mlflow.data.from_spark(train_set_spark, table_name=f"{full_schema_name}.train_set", version="0")
     mlflow.log_input(dataset, context="training")
-    
+
     # log model
     model_name = config.model_artifact_name
-    mlflow.sklearn.log_model(
-        sk_model=model,
-        artifact_path=model_name,
-        signature=signature
-    )
+    mlflow.sklearn.log_model(sk_model=model, artifact_path=model_name, signature=signature)
 
 # COMMAND ----------
 # register model
 model_version = mlflow.register_model(
-    model_uri=f'runs:/{run_id}/{model_name}',
+    model_uri=f"runs:/{run_id}/{model_name}",
     name=f"{full_schema_name}.{config.model_name}",
-    tags={"git_sha": f"{git_sha}"})
+    tags={"git_sha": f"{git_sha}"},
+)
 
 # COMMAND ----------
 # get dataset info and load source from mlflow run
