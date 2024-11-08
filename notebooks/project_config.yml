@@ -1,10 +1,17 @@
-catalog_name: marvelous_mlops
-schema_name: house_prices
+catalog_name: dsa_sandbox
+schema_name: mlops_training
 
 parameters:
   learning_rate: 0.01
   n_estimators: 1000
   max_depth: 6
+
+ab_test:
+  learning_rate_a: 0.02
+  learning_rate_b: 0.02
+  n_estimators: 1000
+  max_depth_a: 6
+  max_depth_b: 10
 
 numeric_features:
   - Temperature
@@ -13,4 +20,4 @@ numeric_features:
   - general diffuse flows
   - diffuse flows
 
-target_column_name: Zone 1 Power Consumption
+target: Zone 1 Power Consumption

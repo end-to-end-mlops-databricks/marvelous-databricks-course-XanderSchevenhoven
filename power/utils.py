@@ -1,6 +1,20 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from re import sub
 
+
+def to_snake(string):
+    return '_'.join(
+        sub(
+            '([A-Z][a-z]+)', 
+            r' \1',
+            sub(
+                '([A-Z]+)', 
+                r' \1',
+                string.replace('-', ' ')
+            )
+        ).split()
+    ).lower()
 
 def visualize_results(y_test, y_pred):
     plt.figure(figsize=(10, 6))
