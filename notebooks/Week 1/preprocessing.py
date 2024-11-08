@@ -29,7 +29,7 @@ from power import DataProcessor, PowerModel, plot_feature_importance, visualize_
 
 # COMMAND ----------
 
-with open("project_config.yml", "r") as file:
+with open("./project_config.yml", "r") as file:
     config = yaml.safe_load(file)
 
 print("Configuration loaded:")
