@@ -1,5 +1,8 @@
 catalog_name: dsa_sandbox
 schema_name: mlops_training
+model_name: zone_1_power_estimator
+model_artifact_name: randomforest-pipeline-model
+experiment_name: /Users/xander.schevenhoven@jumbo.com/mlops_training/week2-notebook2
 
 parameters:
   learning_rate: 0.01

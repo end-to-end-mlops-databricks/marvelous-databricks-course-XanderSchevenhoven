@@ -7,6 +7,8 @@ import numpy as np
 def to_snake(string):
     return "_".join(sub("([A-Z][a-z]+)", r" \1", sub("([A-Z]+)", r" \1", string.replace("-", " "))).split()).lower()
 
+def adjust_predictions(predictions, scale_factor=1.3):
+    return predictions * scale_factor
 
 def visualize_results(y_test, y_pred):
     plt.figure(figsize=(10, 6))

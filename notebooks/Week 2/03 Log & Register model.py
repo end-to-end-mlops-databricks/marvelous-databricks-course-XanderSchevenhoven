@@ -79,7 +79,7 @@ model
 
 # COMMAND ----------
 # create experiment
-mlflow.set_experiment(experiment_name='/Users/xander.schevenhoven@jumbo.com/mlops_training/week2-notebook2')
+mlflow.set_experiment(experiment_name=config.experiment_name)
 git_sha = "ffa63b430205ff7"
 
 # COMMAND ----------
@@ -103,7 +103,7 @@ with mlflow.start_run(
     print(f"R2 Score: {r2}")
 
     # Log parameters, metrics, and the model to MLflow
-    mlflow.log_param("model_type", "LightGBM with preprocessing")
+    mlflow.log_param("model_type", "Random Forest with preprocessing")
     mlflow.log_params(config.parameters)
     mlflow.log_metric("mse", mse)
     mlflow.log_metric("mae", mae)
@@ -119,7 +119,7 @@ with mlflow.start_run(
     mlflow.log_input(dataset, context="training")
     
     # log model
-    model_name = "randomforest-pipeline-model"
+    model_name = config.model_artifact_name
     mlflow.sklearn.log_model(
         sk_model=model,
         artifact_path=model_name,
@@ -130,7 +130,7 @@ with mlflow.start_run(
 # register model
 model_version = mlflow.register_model(
     model_uri=f'runs:/{run_id}/{model_name}',
-    name=f"{full_schema_name}.zone_1_power_estimator",
+    name=f"{full_schema_name}.{config.model_name}",
     tags={"git_sha": f"{git_sha}"})
 
 # COMMAND ----------

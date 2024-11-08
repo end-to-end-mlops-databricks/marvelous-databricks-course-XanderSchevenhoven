@@ -7,6 +7,9 @@ from pydantic import BaseModel
 class ProjectConfig(BaseModel):
     catalog_name: str
     schema_name: str
+    model_name: str
+    model_artifact_name: str
+    experiment_name: str
     numeric_features: List[str]
     target: str
     parameters: Dict[str, Any]  # Dictionary to hold model-related parameters
