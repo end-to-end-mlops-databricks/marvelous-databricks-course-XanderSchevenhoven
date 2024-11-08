@@ -143,7 +143,7 @@ regressor = RandomForestRegressor(
 
 # create sklearn pipeline with preprocssor and regressor
 model = Pipeline(steps=[("preprocessor", preprocessor), ("regressor", regressor)])
-model
+model  # noqa: B018
 
 # COMMAND ----------
 # Set and start MLflow experiment

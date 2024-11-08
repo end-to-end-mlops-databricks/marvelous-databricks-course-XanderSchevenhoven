@@ -148,4 +148,4 @@ client.get_model_version_by_alias(full_pyfunc_model_name, model_version_alias)
 # COMMAND ----------
 
 # display model
-model
+model  # noqa
