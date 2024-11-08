@@ -24,7 +24,6 @@ get_ipython().run_line_magic("pip", 'install -e "../.."')
 
 # COMMAND ----------
 
-import yaml
 
 from power import DataProcessor, ProjectConfig
 

@@ -1,13 +1,11 @@
+import pandas as pd
+import pyspark.sql.functions as f
+from databricks.sdk.runtime import spark
+from sklearn.model_selection import train_test_split
+from ucimlrepo import fetch_ucirepo
+
 from .config import ProjectConfig
 from .utils import to_snake
-
-from databricks.sdk.runtime import spark
-import pyspark.sql.functions as f
-
-import pandas as pd
-from re import sub
-from ucimlrepo import fetch_ucirepo
-from sklearn.model_selection import train_test_split
 
 
 class DataProcessor:
@@ -27,7 +25,6 @@ class DataProcessor:
         self.pdf_target = None
         self.preprocessor = None
         self.full_schema_name = f"{self.config.catalog_name}.{self.config.schema_name}"
-        
 
     def load_data(self):
         """
@@ -76,14 +73,10 @@ class DataProcessor:
         self.pdf = self.pdf.dropna(subset=[target_column_name])
 
         # convert column names to snake strings
-        self.pdf.columns = [
-            to_snake(column) for column in self.pdf.columns
-        ]
+        self.pdf.columns = [to_snake(column) for column in self.pdf.columns]
         self.target = to_snake(target_column_name)
-        self.numeric_features = [
-            to_snake(column) for column in numeric_features
-        ]
-    
+        self.numeric_features = [to_snake(column) for column in numeric_features]
+
     def split_data(self, test_size: float = 0.2, random_state: int = 42) -> tuple:
         """
         Method to split the dataset into training and test datasets.
@@ -112,27 +105,18 @@ class DataProcessor:
             raise ValueError("test_size must be between 0 and 1")
 
         return train_test_split(self.pdf, test_size=test_size, random_state=random_state)
-    
+
     def _add_current_timestamp_column(self, sdf):
-        return (
-            sdf
-            .withColumn("update_timestamp", f.current_timestamp())
-        )
+        return sdf.withColumn("update_timestamp", f.current_timestamp())
 
     def _convert_pandas_to_spark(self, pdf):
         return spark.createDataFrame(pdf)
-    
+
     def _append_to_table(self, sdf, table_name):
-        
         full_table_name = f"{self.full_schema_name}.{table_name}"
-        
+
         # append to table
-        (
-            sdf
-            .write
-            .mode('append')
-            .saveAsTable(full_table_name)
-        )
+        (sdf.write.mode("append").saveAsTable(full_table_name))
 
         # set properties
         spark.sql(
@@ -142,7 +126,6 @@ class DataProcessor:
             """
         )
 
-    
     def save_to_catalog(self, pdf_train_set: pd.DataFrame, pdf_test_set: pd.DataFrame):
         """
         Save the train and test sets into Databricks tables.
