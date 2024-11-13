@@ -1,28 +1,30 @@
-from sklearn.compose import ColumnTransformer
-from sklearn.impute import SimpleImputer
+import pandas as pd
+import pyspark.sql.functions as f
+from databricks.sdk.runtime import spark
 from sklearn.model_selection import train_test_split
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler
 from ucimlrepo import fetch_ucirepo
+
+from .config import ProjectConfig
+from .utils import to_snake
 
 
 class DataProcessor:
-    def __init__(self, config: dict) -> None:
+    def __init__(self, config: ProjectConfig) -> None:
         """
         Initiate DataProcessor class and its attributes. The provided csv file_path is
         automatically loaded and stored in this class.
 
         Parameters
         ----------
-        config : dict
-            Dictionary with configuration options for preprocessing.
-
+        config : ProjectConfig
+            ProjectConfig instance with with project configuration variables
         """
         self.config = config
         self.pdf = self.load_data()
         self.pdf_features = None
         self.pdf_target = None
         self.preprocessor = None
+        self.full_schema_name = f"{self.config.catalog_name}.{self.config.schema_name}"
 
     def load_data(self):
         """
@@ -39,7 +41,7 @@ class DataProcessor:
         # data (as pandas dataframes)
         return power_consumption_of_tetouan_city.data.original
 
-    def preprocess_data(self):
+    def prepare_data(self):
         """
         Method to create preprocessing pipeline steps.
 
@@ -56,14 +58,10 @@ class DataProcessor:
         ValueError
             If configuration values are invalid
         """
-        required_keys = ["target_column_name", "numeric_features"]
-        missing_keys = [key for key in required_keys if key not in self.config]
-        if missing_keys:
-            raise KeyError(f"Missing required config keys: {missing_keys}")
 
         # get target_column_name from config
-        target_column_name = self.config["target_column_name"]
-        numeric_features = self.config["numeric_features"]
+        target_column_name = self.config.target
+        numeric_features = self.config.numeric_features
 
         if not numeric_features:
             raise ValueError("numeric_features cannot be empty")
@@ -74,17 +72,10 @@ class DataProcessor:
         # remove rows with missing values in target
         self.pdf = self.pdf.dropna(subset=[target_column_name])
 
-        # separate features and target into their own dataframes
-        self.pdf_features = self.pdf[numeric_features]
-        self.pdf_target = self.pdf[target_column_name]
-
-        # create sklearn preprocessing pipeline steps
-        numeric_transformer = Pipeline(
-            steps=[("imputer", SimpleImputer(strategy="median")), ("scaler", StandardScaler())]
-        )
-
-        # combine preprocessing steps into single transformer
-        self.preprocessor = ColumnTransformer(transformers=[("numeric", numeric_transformer, numeric_features)])
+        # convert column names to snake strings
+        self.pdf.columns = [to_snake(column) for column in self.pdf.columns]
+        self.target = to_snake(target_column_name)
+        self.numeric_features = [to_snake(column) for column in numeric_features]
 
     def split_data(self, test_size: float = 0.2, random_state: int = 42) -> tuple:
         """
@@ -100,17 +91,54 @@ class DataProcessor:
         Returns
         -------
         tuple
-            (X_train, X_test, y_train, y_test) split of features and target
+            train_set, test_set split of the dataset
 
         Raises
         ------
         ValueError
             If preprocessing hasn't been performed or parameters are invalid
         """
-        if self.pdf_features is None or self.pdf_target is None:
+        if self.pdf is None:
             raise ValueError("Must call preprocess_data before splitting")
 
         if not 0 < test_size < 1:
             raise ValueError("test_size must be between 0 and 1")
 
-        return train_test_split(self.pdf_features, self.pdf_target, test_size=test_size, random_state=random_state)
+        return train_test_split(self.pdf, test_size=test_size, random_state=random_state)
+
+    def _add_current_timestamp_column(self, sdf):
+        return sdf.withColumn("update_timestamp", f.current_timestamp())
+
+    def _convert_pandas_to_spark(self, pdf):
+        return spark.createDataFrame(pdf)
+
+    def _append_to_table(self, sdf, table_name):
+        full_table_name = f"{self.full_schema_name}.{table_name}"
+
+        # append to table
+        (sdf.write.mode("append").saveAsTable(full_table_name))
+
+        # set properties
+        spark.sql(
+            f"""
+            ALTER TABLE {full_table_name}
+            SET TBLPROPERTIES (delta.enableChangeDataFeed = true);
+            """
+        )
+
+    def save_to_catalog(self, pdf_train_set: pd.DataFrame, pdf_test_set: pd.DataFrame):
+        """
+        Save the train and test sets into Databricks tables.
+        """
+
+        # convert pandas to spark
+        sdf_train_set = self._convert_pandas_to_spark(pdf_train_set)
+        sdf_test_set = self._convert_pandas_to_spark(pdf_test_set)
+
+        # add update timestamp column
+        sdf_train_set = self._add_current_timestamp_column(sdf_train_set)
+        sdf_test_set = self._add_current_timestamp_column(sdf_test_set)
+
+        # write
+        self._append_to_table(sdf_train_set, "train_set")
+        self._append_to_table(sdf_test_set, "test_set")

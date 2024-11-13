@@ -3,8 +3,9 @@ name = "mlops-with-databricks"
 version = "0.0.1"
 description = "MLOps with Databricks"
 readme = "README.md"
-requires-python = ">=3.11, <3.12"
+requires-python = ">=3.11,<3.12"
 dependencies = [
+    "mlflow==2.17.0",
     "ucimlrepo==0.0.7",
     "scikit-learn>=1.5.1, <2",
     "numpy>=1.26.4, <2",
@@ -12,7 +13,8 @@ dependencies = [
     "pyarrow>=15.0.2, <16",
     "cffi>=1.17.1, <2",
     "scipy>=1.14.1, <2",
-    "matplotlib>=3.9.2, <4"
+    "matplotlib>=3.9.2, <4",
+    "pydantic==2.9.2"
 ]
 
 [project.optional-dependencies]

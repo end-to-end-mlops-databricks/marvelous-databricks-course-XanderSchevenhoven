@@ -95,5 +95,5 @@ dmypy.json
 # VS code configuration
 .vscode
 .history
-
+__builtins__.pyi
 .databricks

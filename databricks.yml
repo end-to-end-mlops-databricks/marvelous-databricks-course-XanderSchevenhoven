@@ -5,9 +5,17 @@
 bundle:
   name: marvelous-databricks-course-XanderSchevenhoven
 
+artifacts:
+  python_package:
+    type: whl
+    path: ./
+    build: python -m build
+
+workspace:
+  artifact_path: "/Volumes/dsa_sandbox/mlops_training/package"
+
 targets:
   dev:
-    mode: development
     default: true
     workspace:
       host: https://adb-8342392658526315.15.azuredatabricks.net
