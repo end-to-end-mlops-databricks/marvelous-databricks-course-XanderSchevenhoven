@@ -14,6 +14,7 @@ class ProjectConfig(BaseModel):
     target: str
     parameters: Dict[str, Any]  # Dictionary to hold model-related parameters
     ab_test: Dict[str, Any]  # Dictionary to hold A/B test parameters
+    package_path: str # path to .whl file to install
 
     @classmethod
     def from_yaml(cls, config_path: str):
