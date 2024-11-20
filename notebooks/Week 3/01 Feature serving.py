@@ -125,7 +125,14 @@ spec = OnlineTableSpec.from_dict(
 )
 
 # Create the online table in Databricks
-online_table_pipeline = workspace.online_tables.create(name=online_table_name, spec=spec)
+# -> try/except in case it already exists
+try:
+    online_table_pipeline = workspace.online_tables.create(
+        name=online_table_name, 
+        spec=spec
+    )
+except:
+    pass
 
 # COMMAND ----------
 # 3. Create feture look up and feature spec table feature table
@@ -142,11 +149,15 @@ features = [
 # Create the feature spec for serving
 feature_spec_name = f"{full_schema_name}.return_predictions"
 
-fe.create_feature_spec(
-    name=feature_spec_name, 
-    features=features, 
-    exclude_columns=None
-)
+# -> try/except in case it already exists
+try:
+    fe.create_feature_spec(
+        name=feature_spec_name, 
+        features=features, 
+        exclude_columns=None
+    )
+except:
+    pass
 
 # COMMAND ----------
 
@@ -158,18 +169,23 @@ fe.create_feature_spec(
 
 # Create a serving endpoint for the house prices predictions
 serving_endpoint_name = "power-consumption-feature-serving"
-workspace.serving_endpoints.create(
-    name=serving_endpoint_name,
-    config=EndpointCoreConfigInput(
-        served_entities=[
-            ServedEntityInput(
-                entity_name=feature_spec_name,  # feature spec name defined in the previous step
-                scale_to_zero_enabled=True,
-                workload_size="Small",  # Define the workload size (Small, Medium, Large)
-            )
-        ]
-    ),
-)
+
+# -> try/except in case it already exists
+try:
+    workspace.serving_endpoints.create(
+        name=serving_endpoint_name,
+        config=EndpointCoreConfigInput(
+            served_entities=[
+                ServedEntityInput(
+                    entity_name=feature_spec_name,  # feature spec name defined in the previous step
+                    scale_to_zero_enabled=True,
+                    workload_size="Small",  # Define the workload size (Small, Medium, Large)
+                )
+            ]
+        ),
+    )
+except:
+    pass
 
 # COMMAND ----------
 
