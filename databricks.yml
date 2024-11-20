@@ -5,6 +5,9 @@
 bundle:
   name: marvelous-databricks-course-XanderSchevenhoven
 
+include:
+  - "resources/*.yml"
+
 artifacts:
   python_package:
     type: whl
