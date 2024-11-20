@@ -24,3 +24,5 @@ numeric_features:
   - diffuse flows
 
 target: Zone 1 Power Consumption
+
+package_path: "/Volumes/dsa_sandbox/mlops_training/package/.internal/"
