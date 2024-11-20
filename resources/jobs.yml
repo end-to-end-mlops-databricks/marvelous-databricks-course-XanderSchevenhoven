@@ -24,6 +24,7 @@ resources:
           job_cluster_key: "power-consumption-cluster"
 
           # existing_cluster_id: 1014-134439-1sgb0b2m
+          # task to update data in train/test set
           spark_python_task:
             python_file: "../week5/process_data.py"
             parameters:
@@ -31,31 +32,35 @@ resources:
               - ${workspace.root_path}
           libraries:
            - whl: ../dist/*.whl
-      #   - task_key: if_refreshed
-      #     condition_task:
-      #       op: "EQUAL_TO"
-      #       left: "{{tasks.preprocessing.values.refreshed}}"
-      #       right: "1"
-      #     depends_on: 
-      #       - task_key: "preprocessing"
-      #   - task_key: "train_model"
-      #     depends_on: 
-      #       - task_key: "if_refreshed"
-      #         outcome: "true"
-      #     job_cluster_key: "power-consumption-cluster"
 
-      #     # existing_cluster_id: 1014-134439-1sgb0b2m
-      #     spark_python_task:
-      #       python_file: "week5/train_model.py"
-      #       parameters:
-      #         - "--root_path"
-      #         - ${workspace.root_path}
-      #         - "--git_sha"
-      #         - ${var.git_sha}
-      #         - "--job_run_id"
-      #         - "{{job.id}}"
-      #     libraries: 
-      #       - whl: ../dist/*.whl
+        # conditional check for if data is refreshed
+        - task_key: if_refreshed
+          condition_task:
+            op: "EQUAL_TO"
+            left: "{{tasks.preprocessing.values.refreshed}}"
+            right: "1"
+          depends_on: 
+            - task_key: "preprocessing"
+        
+        # task to train & register model in UC
+        - task_key: "train_model"
+          depends_on: 
+            - task_key: "if_refreshed"
+              outcome: "true"
+          job_cluster_key: "power-consumption-cluster"
+          spark_python_task:
+            python_file: "../week5/train_model.py"
+            parameters:
+              - "--root_path"
+              - ${workspace.root_path}
+              - "--git_sha"
+              - ${var.git_sha}
+              - "--job_run_id"
+              - "{{job.id}}"
+          libraries: 
+            - whl: ../dist/*.whl
+
+      # task to evaluate model performance
       #   - task_key: "evaluate_model"
       #     depends_on: 
       #       - task_key: "train_model"
